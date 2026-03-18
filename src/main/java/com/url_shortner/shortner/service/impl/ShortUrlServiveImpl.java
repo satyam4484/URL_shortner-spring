@@ -3,6 +3,7 @@ package com.url_shortner.shortner.service.impl;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.url_shortner.shortner.dto.RequestDto;
@@ -41,15 +42,21 @@ public class ShortUrlServiveImpl implements ShortUrlService {
     }
 
     @Override
+    @Cacheable(value = "urls", key = "#shortCode")
     public String getFullUrl(String shortCode) {
+
+        System.out.println("Fetching from DB..."); // debug
+
         ShortUrl shortUrl = shortUrlRepository.findByShortCode(shortCode)
-                .orElseThrow(() -> new RuntimeException("Short URL not found"));    
+                .orElseThrow(() -> new RuntimeException("Short URL not found"));
+
         return shortUrl.getLongUrl();
     }
+
     // Utility method
     private String generateShortCode() {
         return UUID.randomUUID()
-                   .toString()
-                   .substring(0, 6);
+                .toString()
+                .substring(0, 6);
     }
 }
